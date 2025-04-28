@@ -3,6 +3,7 @@ from utils.fechas import interpretar_fecha
 from servicios.newsapi_service import obtener_noticias
 from config import CATEGORIAS_MAP
 
+#talk es el comando que hace que hable el asistente
 def manejar_comando_noticias():
     talk("¿De qué fecha quieres noticias?")
     fecha = None
