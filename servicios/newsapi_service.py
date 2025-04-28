@@ -1,9 +1,9 @@
 import requests
 from config import NEWSAPI_KEY
 
-def obtener_noticias(fecha=None, categoria=None, pagina=1):
+def obtener_noticias(fecha=None, categoria=None, pagina=1, page_size=10):
     # La URL base para obtener las noticias
-    url = f"https://newsapi.org/v2/everything?q=ecuador&apiKey={NEWSAPI_KEY}&language=es&pageSize=3&page={pagina}"
+    url = f"https://newsapi.org/v2/everything?q=ecuador&apiKey={NEWSAPI_KEY}&language=es&pageSize={page_size}&page={pagina}"
 
     # Añadir parámetros de fecha si están presentes
     if fecha:
@@ -19,8 +19,9 @@ def obtener_noticias(fecha=None, categoria=None, pagina=1):
 
     # Verificar el estado de la respuesta de la API
     if datos.get('status') == 'ok':
-        return datos.get('articles', [])  # Retornar los artículos de la respuesta
+        total_results = datos.get('totalResults', 0)  # Obtener el número total de artículos
+        articles = datos.get('articles', [])  # Obtener los artículos de la respuesta
+        return articles, total_results  # Devolver los artículos y el total de resultados
     else:
-        # Si no hay resultados, retornar una lista vacía
-        return []
-
+        # Si no hay resultados, retornar una lista vacía y 0 como total
+        return [], 0
