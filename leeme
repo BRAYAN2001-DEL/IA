@@ -1,0 +1,17 @@
+--para crear el entono virtual
+py -m venv venv
+
+
+--para activarlo: 
+.\venv\Scripts\Activate
+
+
+requerimient jarvis.py
+
+pip install SpeechRecognition
+pip install SpeechRecognition
+pip install pyaudio
+
+
+key api de noticias;
+66f5e61e493145b8b6b1214f97f456f6
