@@ -2,7 +2,7 @@ from utils.voz import talk, escuchar
 from comandos.noticias import manejar_comando_noticias
 
 def main():
-    talk("¡Hola! Soy tu asistente de virtual. Di 'noticias' para comenzar o 'adiós' para salir.")
+    talk("¡Hola! Soy tu asistente virtual. Di 'noticias' para comenzar o 'adiós' para salir.")
     while True:
         comando = escuchar()
         if "noticias" in comando:
