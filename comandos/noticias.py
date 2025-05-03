@@ -3,9 +3,7 @@ from utils.fechas import interpretar_fecha
 from servicios.newsapi_service import obtener_noticias
 from config import CATEGORIAS_MAP
 
-# talk es el comando que hace que hable el asistente
 def manejar_comando_noticias():
-    # Preguntar la fecha y verificar la respuesta
     talk("¿De qué fecha quieres noticias?")
     fecha = None
     while not fecha:
@@ -17,7 +15,6 @@ def manejar_comando_noticias():
         if not fecha:
             talk("No entendí la fecha. Intenta otra vez.")
     
-    # Preguntar la categoría
     talk("¿Qué categoría? Tecnología, deportes, salud, o ninguna.")
     categoria = None
     while categoria is None:
@@ -25,22 +22,19 @@ def manejar_comando_noticias():
         if "cerrar comando" in categoria_texto.lower():
             talk("Saliendo del comando de noticias.")
             return
-        if categoria_texto == "ninguna":
+        if categoria_texto.lower() == "ninguna":
             break
         categoria = CATEGORIAS_MAP.get(categoria_texto.lower())
         if not categoria:
             talk("No reconocí esa categoría. Intenta otra vez.")
     
     try:
-        # Obtener las noticias y el total de resultados
         noticias, total_results = obtener_noticias(fecha=fecha, categoria=categoria, pagina=1, page_size=10)
 
         if noticias:
-            # Informar al usuario cuántas noticias hay en total
             talk(f"Encontré {total_results} noticias para la fecha {fecha} en la categoría {categoria if categoria else 'ninguna'}.")
             talk(f"Cada página tiene 10 noticias.")
             
-            # Preguntar cuántas noticias desea escuchar
             talk("¿Cuántas noticias deseas escuchar? Indica un número.")
             cantidad_noticias = None
             while not cantidad_noticias:
@@ -55,8 +49,9 @@ def manejar_comando_noticias():
                         cantidad_noticias = None
                 except ValueError:
                     talk("No entendí el número. Intenta otra vez.")
-            
-            # Preguntar desde qué página desea comenzar (por defecto 1)
+
+            cantidad_noticias = min(cantidad_noticias, total_results)
+
             talk("¿Desde qué página quieres comenzar? Puedes elegir la página 1, la 2, o cualquier otra.")
             pagina_inicio = None
             while not pagina_inicio:
@@ -71,41 +66,30 @@ def manejar_comando_noticias():
                 except ValueError:
                     talk("No entendí la página. Por favor, di un número válido.")
             
-            # Calcular el número total de páginas disponibles
             total_pages = (total_results // 10) + (1 if total_results % 10 != 0 else 0)
             talk(f"Hay {total_pages} páginas de noticias disponibles.")
-            
-            pagina = pagina_inicio  # Empezar desde la página seleccionada
 
-            # Loop para escuchar las noticias
+            pagina = pagina_inicio
             noticias_restantes = cantidad_noticias
+
             while noticias_restantes > 0 and pagina <= total_pages:
-                # Obtener las noticias de la página correspondiente
                 noticias, _ = obtener_noticias(fecha=fecha, categoria=categoria, pagina=pagina, page_size=10)
 
                 if noticias:
                     for articulo in noticias:
+                        if noticias_restantes <= 0:
+                            break
                         talk(f"Título: {articulo['title']}")
                         talk(f"Descripción: {articulo.get('description', 'Sin descripción')}")
                         noticias_restantes -= 1
-
-                        if noticias_restantes <= 0:
-                            break
-                    
-                    if noticias_restantes > 0:
-                        talk(f"¿Quieres escuchar más noticias de la página {pagina}? Di 'sigue' para más o 'no' para finalizar.")
-                        respuesta = escuchar().lower()
-                        if respuesta != "sigue":
-                            break
-                    
-                    pagina += 1  # Avanzar a la siguiente página
                 else:
-                    talk("No hay más noticias disponibles para esta página.")
                     break
+                pagina += 1
 
             if noticias_restantes > 0:
                 talk("Has llegado al final de las noticias disponibles.")
-
+            else:
+                talk("Eso es todo por ahora.")
         else:
             talk("No encontré noticias para esos filtros.")
     except Exception as e:
