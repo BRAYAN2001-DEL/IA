@@ -6,15 +6,29 @@ from config import CATEGORIAS_MAP
 def manejar_comando_noticias():
     talk("¿De qué fecha quieres noticias?")
     fecha = None
-    while not fecha:
+    while True:
         fecha_texto = escuchar()
         if "cerrar comando" in fecha_texto.lower():
             talk("Saliendo del comando de noticias.")
             return
-        fecha = interpretar_fecha(fecha_texto)
-        if not fecha:
+        fecha_interpretada = interpretar_fecha(fecha_texto)
+
+        if not fecha_interpretada:
             talk("No entendí la fecha. Intenta otra vez.")
-    
+            continue
+
+        # Convertir string a objeto date
+        from datetime import datetime
+        fecha = datetime.strptime(fecha_interpretada, "%Y-%m-%d").date()
+        talk(f"Entendí que quieres noticias del {fecha.strftime('%A %d de %B de %Y')}. ¿Deseas cambiarla?")
+ 
+        respuesta = escuchar()
+        if "sí" in respuesta.lower() or "cambiar" in respuesta.lower():
+            talk("Está bien, dime la nueva fecha.")
+            continue
+        else:
+            break
+
     talk("¿Qué categoría? Tecnología, deportes, salud, o ninguna.")
     categoria = None
     while categoria is None:
@@ -27,14 +41,14 @@ def manejar_comando_noticias():
         categoria = CATEGORIAS_MAP.get(categoria_texto.lower())
         if not categoria:
             talk("No reconocí esa categoría. Intenta otra vez.")
-    
+
     try:
         noticias, total_results = obtener_noticias(fecha=fecha, categoria=categoria, pagina=1, page_size=10)
 
         if noticias:
-            talk(f"Encontré {total_results} noticias para la fecha {fecha} en la categoría {categoria if categoria else 'ninguna'}.")
+            talk(f"Encontré {total_results} noticias para la fecha {fecha.strftime('%d/%m/%Y')} en la categoría {categoria if categoria else 'ninguna'}.")
             talk(f"Cada página tiene 10 noticias.")
-            
+
             talk("¿Cuántas noticias deseas escuchar? Indica un número.")
             cantidad_noticias = None
             while not cantidad_noticias:
@@ -63,9 +77,10 @@ def manejar_comando_noticias():
                     pagina_inicio = int(pagina_inicio_texto)
                     if pagina_inicio <= 0:
                         talk("Por favor, ingresa un número mayor que 0 para la página.")
+                        pagina_inicio = None
                 except ValueError:
                     talk("No entendí la página. Por favor, di un número válido.")
-            
+
             total_pages = (total_results // 10) + (1 if total_results % 10 != 0 else 0)
             talk(f"Hay {total_pages} páginas de noticias disponibles.")
 

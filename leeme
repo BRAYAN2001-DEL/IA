@@ -11,7 +11,14 @@ requerimient jarvis.py
 pip install SpeechRecognition
 pip install SpeechRecognition
 pip install pyaudio
+pip install debugpy
+
 
 
 key api de noticias;
 66f5e61e493145b8b6b1214f97f456f6
+
+para levantar el ambiente debug:
+1.-
+ .\venv\Scripts\Activate
+python -m debugpy --listen 5678 --wait-for-client main.py
